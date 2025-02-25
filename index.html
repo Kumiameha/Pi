@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeraBox Direct Link Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        input, button { padding: 10px; margin: 10px; width: 300px; }
+        #result { margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+
+    <h2>TeraBox Direct Link Generator</h2>
+    <input type="text" id="videoUrl" placeholder="Enter TeraBox Link">
+    <button onclick="getDirectLink()">Get Direct Link</button>
+
+    <div id="result">
+        <h3>Direct Link:</h3>
+        <input type="text" id="directLink" readonly>
+        <button onclick="copyLink()">Copy Link</button>
+    </div>
+
+    <script>
+        function getDirectLink() {
+            let videoUrl = document.getElementById("videoUrl").value.trim();
+            if (videoUrl === "") {
+                alert("Please enter a valid TeraBox link!");
+                return;
+            }
+
+            fetch('/get-link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: videoUrl })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.direct_link) {
+                    document.getElementById("directLink").value = data.direct_link;
+                    document.getElementById("result").style.display = "block";
+                } else {
+                    alert("Failed to fetch direct link!");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function copyLink() {
+            let linkInput = document.getElementById("directLink");
+            linkInput.select();
+            document.execCommand("copy");
+            alert("Link copied to clipboard!");
+        }
+    </script>
+
+</body>
+</html>
