@@ -12,7 +12,7 @@
 </head>
 <body>
 
-    <h2>TeraBox Direct Link Generator</h2>
+    <h2>🔗 TeraBox Direct Link Generator</h2>
     <input type="text" id="videoUrl" placeholder="Enter TeraBox Link">
     <button onclick="getDirectLink()">Get Direct Link</button>
 
@@ -23,28 +23,33 @@
     </div>
 
     <script>
+        function extractKey(url) {
+            let match = url.match(/\/s\/([^?]+)/);
+            return match ? match[1] : null;
+        }
+
         function getDirectLink() {
             let videoUrl = document.getElementById("videoUrl").value.trim();
-            if (videoUrl === "") {
-                alert("Please enter a valid TeraBox link!");
+            let key = extractKey(videoUrl);
+
+            if (!key) {
+                alert("Invalid TeraBox link!");
                 return;
             }
 
-            fetch('/get-link', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: videoUrl })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.direct_link) {
-                    document.getElementById("directLink").value = data.direct_link;
-                    document.getElementById("result").style.display = "block";
-                } else {
-                    alert("Failed to fetch direct link!");
-                }
-            })
-            .catch(error => console.error("Error:", error));
+            let apiUrl = `https://www.terabox.com/share/list?app_id=250528&shorturl=${key}&root=1`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.list && data.list[0].dlink) {
+                        document.getElementById("directLink").value = data.list[0].dlink;
+                        document.getElementById("result").style.display = "block";
+                    } else {
+                        alert("Failed to fetch direct link!");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
         }
 
         function copyLink() {
